@@ -103,14 +103,15 @@ def handle_message(chat_id, message):
 def parser():
     while True:
         log("Parse for chats: {}".format(json.dumps(chats)))
-        for chat_id, url in chats.iteritems():
+        chats_copy = chats.copy()
+        for chat_id, url in chats_copy.iteritems():
             log("Parse {} : {}".format(chat_id, url))
             refs = parse(known_path, url)
             log("Parsed {}".format(len(refs), url))
             if len(refs) > 0:
                 message = u"\n".join(refs)
                 send_message(chat_id, message)
-        sleep_time = 10 if len(chats) == 0 else 600
+        sleep_time = 10 if len(chats_copy) == 0 else 600
         log("Sleep: {}ms".format(sleep_time))
         gevent.sleep(sleep_time)
 
