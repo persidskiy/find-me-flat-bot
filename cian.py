@@ -32,7 +32,7 @@ def get_local_page():
 def has_class(el, str):
     classes = el.attrs.get("class", [])
     for cls in classes:
-        if cls.startswith(str):
+        if str in cls:
             return True
     return False
 
@@ -73,6 +73,7 @@ def get_flat_refs(data):
 
 def parse(known_path, url):
     page_data = get_page(url)
+    # page_data = get_local_page()
     refs = get_flat_refs(page_data)
     known_refs = get_known_refs(known_path)
     new_refs = refs - known_refs

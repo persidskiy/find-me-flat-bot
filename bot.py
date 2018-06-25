@@ -30,7 +30,7 @@ def add_chat(chat_id, url):
 
 def remove_chat(chat_id):
     del chats[chat_id]
-    save_json(chats_path, list(chats))
+    save_json(chats_path, chats)
     log("Chat {}: Removed from queue".format(str(chat_id)))
 
 
@@ -78,8 +78,8 @@ def updater():
                 updates)
             for upd in message_updates:
                 text = upd["message"]["text"]
-                chat_id = upd["message"]["chat"]["id"]
-                log("Got message (chat:{}): {}".format(str(chat_id), text))
+                chat_id = str(upd["message"]["chat"]["id"])
+                log("Got message (chat:{}): {}".format(chat_id, text))
                 handle_message(chat_id, text)
 
 
@@ -95,12 +95,14 @@ def handle_message(chat_id, message):
         remove_chat(chat_id)
         send_message(chat_id, "Ok, you will not receive messages")
     if message == u"/ping":
+        log("ping  {}".format(json.dumps(chats)))
         send_message(chat_id,
-                     u"Pong! Subscribed: {}".format(chats.get(str(chat_id), False)))
+                     u"Pong! Subscribed: {}".format(chats.get(chat_id, False)))
 
 
 def parser():
     while True:
+        log("Parse for chats: {}".format(json.dumps(chats)))
         for chat_id, url in chats.iteritems():
             log("Parse {} : {}".format(chat_id, url))
             refs = parse(known_path, url)
@@ -108,7 +110,9 @@ def parser():
             if len(refs) > 0:
                 message = u"\n".join(refs)
                 send_message(chat_id, message)
-        gevent.sleep(10 * 60)
+        sleep_time = 10 if len(chats) == 0 else 600
+        log("Sleep: {}ms".format(sleep_time))
+        gevent.sleep(sleep_time)
 
 
 def main():
